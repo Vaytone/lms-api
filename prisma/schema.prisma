@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DB_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  login String @unique
+  password String
+  first_name String
+  last_name String
+  created_at DateTime @default(now())
+  updated_at DateTime? @updatedAt
+  role Role @default(guest)
+  role_description String?
+  organisation_id Int
+  active Boolean @default(false)
+  closed Boolean @default(false)
+
+  // relation
+  token Token?
+  organisation Organisation @relation(fields: [organisation_id], references: [id])
+}
+
+enum Role {
+  guest
+  owner
+  admin
+  student
+  watcher
+}
+
+enum RegisterRole {
+  guest
+  admin
+  student
+  watcher
+}
+
+model Organisation {
+  id Int @id @default(autoincrement())
+  name String
+  short_name String
+  description String?
+  plan_id Int
+  active Boolean @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime? @updatedAt
+
+  users User[]
+  links RegisterLink[]
+
+  // relation
+  plan SubscriptionPlan @relation(fields: [plan_id], references: [id])
+}
+
+model SubscriptionPlan {
+  id Int @id @default(autoincrement())
+  price Float
+  max_student Int @default(100)
+  max_admin Int @default(100)
+  max_watcher Int @default(100)
+  name String
+
+  organisations Organisation[]
+}
+
+model RegisterLink {
+  id Int @id @default(autoincrement())
+  role RegisterRole @default(guest)
+  link_code String
+  organisation_id Int
+
+  // relation
+  organisation Organisation @relation(fields: [organisation_id], references: [id])
+}
+
+model Token {
+  id Int @id @default(autoincrement())
+  token String
+  user_id Int @unique
+
+  // relation
+  user User @relation(fields: [user_id], references: [id])
+}
+
+
+
