@@ -1,5 +1,6 @@
 import { Role } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserWithOrg } from '../../user/types/user.types';
 
 export class UserDto {
   @ApiProperty({
@@ -46,4 +47,13 @@ export class UserDto {
     example: 'vsfsdxcvw8we.sdfs.bcvbgdgdf',
   })
   token: string;
+
+  @ApiProperty({
+    description: 'User organisation',
+    example: {
+      name: 'school full name',
+      short_name: 'sfc #1',
+    },
+  })
+  organisation: UserWithOrg['organisation'];
 }

@@ -1,4 +1,4 @@
-import { RegisterRole } from '@prisma/client';
+import { RegisterRole, User } from '@prisma/client';
 
 export interface CreateUser {
   firstName: string;
@@ -7,4 +7,11 @@ export interface CreateUser {
   password: string;
   role: RegisterRole;
   organisation_id: number;
+}
+
+export interface UserWithOrg extends User {
+  organisation: {
+    name: string;
+    short_name: string;
+  };
 }

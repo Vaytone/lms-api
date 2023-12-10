@@ -1,8 +1,8 @@
-import { User, Role } from '@prisma/client';
-import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
+import { UserWithOrg } from '../../user/types/user.types';
 
 export class SimpleUserDto {
-  constructor(user: User) {
+  constructor(user: UserWithOrg) {
     this.firstName = user.first_name;
     this.lastName = user.last_name;
     this.login = user.login;
@@ -10,49 +10,17 @@ export class SimpleUserDto {
     this.active = user.active;
     this.closed = user.closed;
     this.role = user.role;
+    this.organisation = {
+      name: user.organisation.name,
+      short_name: user.organisation.short_name,
+    };
   }
-  @ApiProperty({
-    description: 'User id',
-    example: 1,
-  })
   id: string | number;
-  @ApiProperty({
-    description: 'User login',
-    example: 'login',
-  })
   login: string;
-  @ApiProperty({
-    description: 'User first name',
-    example: 'Viktor',
-  })
   firstName: string;
-  @ApiProperty({
-    description: 'User surname',
-    example: 'Viktorov',
-  })
   lastName: string;
-
-  @ApiProperty({
-    description: 'User token',
-    example: 'xcdsjknskjnkm342nmxc.gdfgmktrmnkn.zxc21q312dsv.sdfsdffsd',
-  })
-  token?: string;
-
-  @ApiProperty({
-    description: 'User active status in organisation',
-    example: false,
-  })
   active: boolean;
-
-  @ApiProperty({
-    description: 'User closed status in organisation',
-    example: false,
-  })
   closed: boolean;
-
-  @ApiProperty({
-    description: 'User role in organisation',
-    enum: ['admin', 'student', 'guest', 'watcher', 'owner'],
-  })
   role: Role;
+  organisation: UserWithOrg['organisation'];
 }
