@@ -45,12 +45,10 @@ export class JwtAuthGuard implements CanActivate {
         return Promise.reject();
       }
 
-      const userData = {
+      req.user = {
         ...user,
         role: userInDb.role,
       };
-
-      req.user = userData;
 
       return true;
     } catch (e) {

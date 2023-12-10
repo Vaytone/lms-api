@@ -6,7 +6,6 @@ import { UserService } from '../user/user.service';
 import { TokenService } from '../token/token.service';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guard/JwtAuth.guard';
-import { RolesGuard } from '../../shared/guards/roles.guard';
 
 @Module({
   providers: [

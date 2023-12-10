@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import { AUTH_ROUTES } from '../../constants/routes/auth.routes';
 import { AuthService } from './auth.service';
 import { InvalidDataException } from '../../exceptions/invalidData.exception';
