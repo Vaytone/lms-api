@@ -6,7 +6,7 @@ export class SignInDto {
     example: 'vikbon',
     description: 'User login',
   })
-  @Length(6, 30)
+  @Length(5, 30)
   @IsString({ message: 'Must be a string' })
   readonly login: string;
   @ApiProperty({

@@ -10,7 +10,9 @@ import { UserDto } from './dto/user.dto';
 import { AuthErrorsEnum } from '../../constants/errors/auth.errors';
 import { SignInDto } from './dto/sign-in.dto';
 import { Public } from 'src/shared/decorator/public.decorator';
+import { FreeAccess } from '../../shared/decorator/freeAccess.decorator';
 
+@FreeAccess()
 @Controller(AUTH_ROUTES.DEFAULT)
 export class AuthController {
   constructor(private authService: AuthService) {}

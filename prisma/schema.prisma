@@ -50,6 +50,8 @@ model Organisation {
   active Boolean @default(true)
   created_at DateTime @default(now())
   updated_at DateTime? @updatedAt
+  registration_active Boolean @default(true)
+  greeting_text String?
 
   users User[]
   links RegisterLink[]

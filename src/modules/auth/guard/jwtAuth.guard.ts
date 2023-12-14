@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthErrorsEnum } from '../../../constants/errors/auth.errors';
 import { PrismaService } from '../../../db/prisma.service';
@@ -42,7 +42,7 @@ export class JwtAuthGuard implements CanActivate {
       });
 
       if (!userInDb) {
-        return Promise.reject();
+        throw new BadRequestException({ message: AuthErrorsEnum.NotAuthorized });
       }
 
       req.user = {
@@ -52,7 +52,7 @@ export class JwtAuthGuard implements CanActivate {
 
       return true;
     } catch (e) {
-      throw new UnauthorizedException({ message: AuthErrorsEnum.NotAuthorized });
+      throw new BadRequestException({ message: AuthErrorsEnum.NotAuthorized });
     }
   }
 }
