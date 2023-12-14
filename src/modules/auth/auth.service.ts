@@ -38,8 +38,6 @@ export class AuthService {
 
     if (!link) throw new InvalidDataException(AuthErrorsEnum.InvalidRegisterLink);
 
-    if (!link.organisation.active) throw new InvalidDataException(AuthErrorsEnum.InvalidRegisterLink);
-
     return {
       role: link.role,
       organisation_name: link.organisation.name,

@@ -7,7 +7,7 @@ import { RolesGuard } from '../../shared/guards/roles.guard';
 @UseGuards(RolesGuard)
 @Controller(ORGANISATION_ROUTES.DEFAULT)
 export class OrganisationController {
-  @Roles(Role.owner)
+  @Roles(Role.admin)
   @Get()
   get() {
     return 'hello';
