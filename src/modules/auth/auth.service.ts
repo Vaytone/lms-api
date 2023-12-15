@@ -130,4 +130,12 @@ export class AuthService {
       throw new UnauthorizedException(AuthErrorsEnum.NotAuthorized);
     }
   }
+
+  async logout(res: Response) {
+    res.clearCookie(COOKIE_TOKEN_NAME, {
+      httpOnly: true,
+      secure: true,
+      sameSite: true,
+    });
+  }
 }
