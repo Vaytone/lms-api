@@ -4,4 +4,5 @@ export const AUTH_ROUTES = {
   VALIDATE_REGISTER_LINK: '/validate-link/:code',
   LOGIN: '/login',
   REFRESH: '/refresh',
+  LOGOUT: '/logout',
 };
