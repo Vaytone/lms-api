@@ -28,9 +28,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   await app.listen(process.env.APP_PORT || 5000, () => {
-    console.log(
-      `LMS-API started http://localhost:${process.env.APP_PORT || 5000}`,
-    );
+    console.log(`LMS-API started http://localhost:${process.env.APP_PORT || 5000}`);
   });
 }
 bootstrap();

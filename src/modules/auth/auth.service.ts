@@ -54,13 +54,11 @@ export class AuthService {
       },
     });
 
-    if (!link) throw new InvalidDataException(AuthErrorsEnum.OrganisationNotFound);
-
-    if (!link.organisation.active) throw new InvalidDataException(AuthErrorsEnum.OrganisationIsInactive);
+    if (!link) return new InvalidDataException(AuthErrorsEnum.OrganisationNotFound);
+    if (!link.organisation.active) return new InvalidDataException(AuthErrorsEnum.OrganisationIsInactive);
 
     const isExist = await this.userService.getUserByLogin(dto.login);
-
-    if (isExist) throw new InvalidDataException(AuthErrorsEnum.UserAlreadyExist);
+    if (isExist) return new InvalidDataException(AuthErrorsEnum.UserAlreadyExist);
 
     try {
       const hashPassword = await bcrypt.hash(dto.password, 10);
@@ -87,7 +85,7 @@ export class AuthService {
         ...userDto,
         token: tokens.access,
       };
-    } catch {
+    } catch (e) {
       return new InvalidDataException(DefaultErrorsEnum.SomethingWentWrong);
     }
   }

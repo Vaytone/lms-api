@@ -11,6 +11,7 @@ import { AuthErrorsEnum } from '../../constants/errors/auth.errors';
 import { SignInDto } from './dto/sign-in.dto';
 import { Public } from 'src/shared/decorator/public.decorator';
 import { FreeAccess } from '../../shared/decorator/freeAccess.decorator';
+import { FormDataRequest } from 'nestjs-form-data';
 
 @FreeAccess()
 @Controller(AUTH_ROUTES.DEFAULT)
@@ -44,12 +45,12 @@ export class AuthController {
     description: 'User cant register',
   })
   @Public()
+  @FormDataRequest()
   @Post(AUTH_ROUTES.REGISTER_BY_LINK)
   register(@Res({ passthrough: true }) res: Response, @Body() dto: RegisterByLinkDto) {
     if (dto.password !== dto.confirmPassword) {
       return new InvalidDataException(AuthErrorsEnum.PasswordDontMatch);
     }
-
     return this.authService.register(res, dto);
   }
 

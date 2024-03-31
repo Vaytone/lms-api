@@ -28,7 +28,9 @@ export class UserService {
   }
 
   async validateUser(dto: SignInDto) {
+    console.log(dto);
     const user: UserWithOrg = await this.getUserByLogin(dto.login);
+    console.log(user);
     try {
       const isPasswordCorrect = await bcrypt.compare(dto.password, user.password);
       if (user && isPasswordCorrect) {
