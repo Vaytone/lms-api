@@ -82,14 +82,13 @@ export class AuthController {
 
   @ApiOkResponse({
     description: 'Clear user session. Logout',
-    type: UserDto,
   })
   @ApiBadRequestResponse({
     description: 'User cannot clear his session',
   })
   @Public()
   @Get(AUTH_ROUTES.LOGOUT)
-  logout(@Req() request: Request) {
-    return this.authService.refresh(request);
+  logout(@Res({ passthrough: true }) res: Response) {
+    return this.authService.logout(res);
   }
 }

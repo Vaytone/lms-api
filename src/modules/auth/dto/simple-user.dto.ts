@@ -14,6 +14,7 @@ export class SimpleUserDto {
       name: user.organisation.name,
       short_name: user.organisation.short_name,
     };
+    this.avatar = user.avatar;
   }
   id: string | number;
   login: string;
@@ -21,6 +22,7 @@ export class SimpleUserDto {
   lastName: string;
   active: boolean;
   closed: boolean;
+  avatar: string | null;
   role: Role;
   organisation: UserWithOrg['organisation'];
 }

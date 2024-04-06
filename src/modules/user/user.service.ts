@@ -21,6 +21,7 @@ export class UserService {
         password: dto.password,
         role: dto.role,
         organisation_id: dto.organisation_id,
+        avatar: dto.avatar,
       },
     });
 

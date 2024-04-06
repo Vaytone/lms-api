@@ -4,25 +4,26 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DB_URL")
+  url      = env("DB_URL")
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  login String @unique
-  password String
-  first_name String
-  last_name String
-  created_at DateTime @default(now())
-  updated_at DateTime? @updatedAt
-  role Role @default(guest)
+  id               Int       @id @default(autoincrement())
+  login            String    @unique
+  password         String
+  first_name       String
+  last_name        String
+  avatar           String?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime? @updatedAt
+  role             Role      @default(guest)
   role_description String?
-  organisation_id Int
-  active Boolean @default(false)
-  closed Boolean @default(false)
+  organisation_id  Int
+  active           Boolean   @default(false)
+  closed           Boolean   @default(false)
 
   // relation
-  token Token?
+  token        Token?
   organisation Organisation @relation(fields: [organisation_id], references: [id])
 }
 
@@ -42,16 +43,16 @@ enum RegisterRole {
 }
 
 model Organisation {
-  id Int @id @default(autoincrement())
-  name String
-  short_name String
-  description String?
-  plan_id Int
-  active Boolean @default(true)
-  created_at DateTime @default(now())
-  updated_at DateTime? @updatedAt
-  registration_active Boolean @default(true)
-  greeting_text String?
+  id                  Int       @id @default(autoincrement())
+  name                String
+  short_name          String
+  description         String?
+  plan_id             Int
+  active              Boolean   @default(true)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime? @updatedAt
+  registration_active Boolean   @default(true)
+  greeting_text       String?
 
   users User[]
   links RegisterLink[]
@@ -61,20 +62,20 @@ model Organisation {
 }
 
 model SubscriptionPlan {
-  id Int @id @default(autoincrement())
-  price Float
-  max_student Int @default(100)
-  max_admin Int @default(100)
-  max_watcher Int @default(100)
-  name String
+  id          Int    @id @default(autoincrement())
+  price       Float
+  max_student Int    @default(100)
+  max_admin   Int    @default(100)
+  max_watcher Int    @default(100)
+  name        String
 
   organisations Organisation[]
 }
 
 model RegisterLink {
-  id Int @id @default(autoincrement())
-  role RegisterRole @default(guest)
-  link_code String
+  id              Int          @id @default(autoincrement())
+  role            RegisterRole @default(guest)
+  link_code       String
   organisation_id Int
 
   // relation
@@ -82,13 +83,10 @@ model RegisterLink {
 }
 
 model Token {
-  id Int @id @default(autoincrement())
-  token String
-  user_id Int @unique
+  id      Int    @id @default(autoincrement())
+  token   String
+  user_id Int    @unique
 
   // relation
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
-
-
-
