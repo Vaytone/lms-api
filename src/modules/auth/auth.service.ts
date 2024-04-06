@@ -16,6 +16,8 @@ import { SignInDto } from './dto/sign-in.dto';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { UserWithOrg } from '../user/types/user.types';
+import { FileManagerService } from '../fileManager/fileManager.service';
+import { AWSDirname } from '../../types/core.types';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +26,7 @@ export class AuthService {
     private userService: UserService,
     private tokenService: TokenService,
     private jwtService: JwtService,
+    private fileService: FileManagerService,
   ) {}
 
   async validateRegisterLink(code: string): Promise<InvalidDataException | ValidateRegisterLinkDto> {
@@ -54,13 +57,20 @@ export class AuthService {
       },
     });
 
-    if (!link) return new InvalidDataException(AuthErrorsEnum.OrganisationNotFound);
-    if (!link.organisation.active) return new InvalidDataException(AuthErrorsEnum.OrganisationIsInactive);
+    if (!link) throw new InvalidDataException(AuthErrorsEnum.OrganisationNotFound);
+    if (!link.organisation.active) throw new InvalidDataException(AuthErrorsEnum.OrganisationIsInactive);
 
     const isExist = await this.userService.getUserByLogin(dto.login);
-    if (isExist) return new InvalidDataException(AuthErrorsEnum.UserAlreadyExist);
+    if (isExist) throw new InvalidDataException(AuthErrorsEnum.UserAlreadyExist);
 
     try {
+      let avatarName = null;
+
+      if (dto.avatar) {
+        avatarName = await this.fileService.uploadFile(AWSDirname.Avatars, dto.avatar);
+        console.log(avatarName);
+      }
+
       const hashPassword = await bcrypt.hash(dto.password, 10);
       const user = await this.userService.createUser({
         lastName: dto.lastName,
@@ -69,6 +79,7 @@ export class AuthService {
         organisation_id: link.organisation_id,
         password: hashPassword,
         role: link.role,
+        avatar: avatarName,
       });
 
       const tokens = this.tokenService.generateTokens(user);
@@ -86,7 +97,7 @@ export class AuthService {
         token: tokens.access,
       };
     } catch (e) {
-      return new InvalidDataException(DefaultErrorsEnum.SomethingWentWrong);
+      throw new InvalidDataException(DefaultErrorsEnum.SomethingWentWrong);
     }
   }
 
@@ -135,5 +146,7 @@ export class AuthService {
       secure: true,
       sameSite: true,
     });
+
+    return true;
   }
 }

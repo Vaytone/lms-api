@@ -7,6 +7,7 @@ export interface CreateUser {
   password: string;
   role: RegisterRole;
   organisation_id: number;
+  avatar: string | null,
 }
 
 export interface UserWithOrg extends User {

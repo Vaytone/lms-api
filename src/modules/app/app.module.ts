@@ -11,10 +11,11 @@ import { JwtAuthGuard } from '../auth/guard/jwtAuth.guard';
 import { OrganisationActiveStatusGuard } from '../organisation/guard/organisationActiveStatus.guard';
 import { PrismaService } from '../../db/prisma.service';
 import { join } from 'path';
+import { FileManagerModule } from '../fileManager/fileManager.module';
 
 @Module({
-  controllers: [AppController],
   imports: [
+    FileManagerModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../../..', '/public/img'),
       exclude: ['/api/(.*)'],
@@ -29,6 +30,7 @@ import { join } from 'path';
     AuthModule,
     OrganisationModule,
   ],
+  controllers: [AppController],
   providers: [
     PrismaService,
     AppService,

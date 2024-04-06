@@ -1,6 +1,7 @@
-import { IsString, Length, Matches } from 'class-validator';
+import { IsOptional, IsString, Length, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { LOGIN_REGEX, NAME_REGEX, PASSWORD_REGEX } from '../constants/regex';
+import { HasMimeType, IsFile, MaxFileSize, MemoryStoredFile } from 'nestjs-form-data';
 
 export class RegisterByLinkDto {
   @ApiProperty({
@@ -10,6 +11,11 @@ export class RegisterByLinkDto {
   @Length(1)
   @IsString({ message: 'Must be a string' })
   readonly code: string;
+  @IsOptional()
+  @IsFile()
+  @MaxFileSize(1e9)
+  @HasMimeType(['image/jpeg', 'image/png', 'image/jpg'])
+  readonly avatar: MemoryStoredFile;
   @Length(1, 25)
   @ApiProperty({
     example: 'Viktor',
