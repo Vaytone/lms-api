@@ -8,19 +8,20 @@ datasource db {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  login            String    @unique
+  id               Int        @id @default(autoincrement())
+  login            String     @unique
   password         String
   first_name       String
   last_name        String
   avatar           String?
-  created_at       DateTime  @default(now())
-  updated_at       DateTime? @updatedAt
-  role             Role      @default(guest)
+  created_at       DateTime   @default(now())
+  updated_at       DateTime?  @updatedAt
+  role             Role       @default(guest)
   role_description String?
   organisation_id  Int
-  active           Boolean   @default(false)
-  closed           Boolean   @default(false)
+  status           UserStatus @default(pending)
+  closed           Boolean    @default(false)
+  isTest           Boolean
 
   // relation
   token        Token?
@@ -33,6 +34,12 @@ enum Role {
   admin
   student
   watcher
+}
+
+enum UserStatus {
+  pending
+  active
+  rejected
 }
 
 enum RegisterRole {

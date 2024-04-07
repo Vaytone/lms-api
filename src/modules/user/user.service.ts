@@ -14,7 +14,7 @@ export class UserService {
     const user = await this.prisma.user.create({
       data: {
         login: dto.login,
-        active: false,
+        status: 'pending',
         closed: false,
         first_name: dto.firstName,
         last_name: dto.lastName,

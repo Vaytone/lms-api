@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role, UserStatus } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserWithOrg } from '../../user/types/user.types';
 
@@ -26,9 +26,9 @@ export class UserDto {
 
   @ApiProperty({
     description: 'User active status in organisation',
-    example: false,
+    example: UserStatus.active,
   })
-  active: boolean;
+  status: UserStatus;
 
   @ApiProperty({
     description: 'User closed status in organisation',

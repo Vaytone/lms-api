@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-// @ts-ignore
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import * as process from 'process';
 import { MemoryStoredFile } from 'nestjs-form-data';
@@ -9,11 +8,13 @@ import { Readable } from 'stream';
 @Injectable()
 export class FileManagerService {
   private AWS_S3_BUCKET = 'school-woop-app';
-  private s3 = new S3Client({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_KEY_ID,
-    region: 'eu-central-1',
-  });
+  private s3 = new S3Client([
+    {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_KEY_ID,
+      region: 'eu-central-1',
+    },
+  ]);
 
   async uploadFile(dirName: AWSDirname, file: MemoryStoredFile) {
     const { originalName } = file;

@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role, UserStatus } from '@prisma/client';
 import { UserWithOrg } from '../../user/types/user.types';
 
 export class SimpleUserDto {
@@ -7,7 +7,7 @@ export class SimpleUserDto {
     this.lastName = user.last_name;
     this.login = user.login;
     this.id = user.id;
-    this.active = user.active;
+    this.status = user.status;
     this.closed = user.closed;
     this.role = user.role;
     this.organisation = {
@@ -20,7 +20,7 @@ export class SimpleUserDto {
   login: string;
   firstName: string;
   lastName: string;
-  active: boolean;
+  status: UserStatus;
   closed: boolean;
   avatar: string | null;
   role: Role;
