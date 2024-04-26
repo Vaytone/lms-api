@@ -10,6 +10,14 @@ export class ApplicationsService {
       where: {
         status: 'pending',
       },
+      orderBy: [
+        {
+          created_at: 'desc',
+        },
+        {
+          id: 'desc',
+        },
+      ],
     });
 
     console.log(result);

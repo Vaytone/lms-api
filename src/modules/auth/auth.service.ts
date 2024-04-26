@@ -72,6 +72,10 @@ export class AuthService {
       }
 
       const hashPassword = await bcrypt.hash(dto.password, 10);
+
+      console.log(dto);
+      console.log(link.organisation_id);
+
       const user = await this.userService.createUser({
         lastName: dto.lastName,
         firstName: dto.firstName,
@@ -81,6 +85,15 @@ export class AuthService {
         role: link.role,
         avatar: avatarName,
       });
+
+      if (dto.greetingMessage) {
+        await this.prisma.userGreetingMessage.create({
+          data: {
+            user_id: user.id,
+            text: dto.greetingMessage,
+          },
+        });
+      }
 
       const tokens = this.tokenService.generateTokens(user);
       await this.tokenService.setToken(user.id, tokens.refresh);
@@ -97,6 +110,7 @@ export class AuthService {
         token: tokens.access,
       };
     } catch (e) {
+      console.log(e);
       throw new InvalidDataException(DefaultErrorsEnum.SomethingWentWrong);
     }
   }

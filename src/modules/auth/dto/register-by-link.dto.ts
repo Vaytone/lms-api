@@ -57,4 +57,7 @@ export class RegisterByLinkDto {
     message: 'Password must be at least 8 characters and less than 25 ',
   })
   readonly confirmPassword: string;
+  @Length(0, 150)
+  @IsString({ message: 'Must be a string' })
+  readonly greetingMessage: string;
 }

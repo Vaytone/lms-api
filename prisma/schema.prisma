@@ -21,11 +21,24 @@ model User {
   organisation_id  Int
   status           UserStatus @default(pending)
   closed           Boolean    @default(false)
-  isTest           Boolean
 
   // relation
   token        Token?
-  organisation Organisation @relation(fields: [organisation_id], references: [id])
+  message      UserGreetingMessage?
+  organisation Organisation         @relation(fields: [organisation_id], references: [id])
+
+  @@map(name: "users")
+}
+
+model UserGreetingMessage {
+  id      Int    @id @default(autoincrement())
+  user_id Int    @unique
+  text    String
+
+  // relation
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map(name: "users_greeting_messages")
 }
 
 enum Role {
@@ -66,6 +79,8 @@ model Organisation {
 
   // relation
   plan SubscriptionPlan @relation(fields: [plan_id], references: [id])
+
+  @@map(name: "organisations")
 }
 
 model SubscriptionPlan {
@@ -77,6 +92,8 @@ model SubscriptionPlan {
   name        String
 
   organisations Organisation[]
+
+  @@map(name: "subscription_plans")
 }
 
 model RegisterLink {
@@ -87,6 +104,8 @@ model RegisterLink {
 
   // relation
   organisation Organisation @relation(fields: [organisation_id], references: [id])
+
+  @@map(name: "register_links")
 }
 
 model Token {
@@ -96,4 +115,6 @@ model Token {
 
   // relation
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map(name: "tokens")
 }
