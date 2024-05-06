@@ -15,12 +15,18 @@ import { DefaultErrorsEnum } from '../../constants/errors/default.errors';
 import { SignInDto } from './dto/sign-in.dto';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { UserWithOrg } from '../user/types/user.types';
+import { UserDetails } from '../user/types/user.types';
 import { FileManagerService } from '../fileManager/fileManager.service';
-import { AWSDirname } from '../../types/core.types';
+import { AWSDirname, Languages } from '../../types/core.types';
+import { generate } from 'otp-generator';
+import { Resend } from 'resend';
+import { generateEmailText } from './helpers/auth.helper';
+import { ValidateOtpDto } from './dto/validate-otp.dto';
 
 @Injectable()
 export class AuthService {
+  private resend = new Resend(process.env.RESEND_API_KEY);
+
   constructor(
     private readonly prisma: PrismaService,
     private userService: UserService,
@@ -47,6 +53,101 @@ export class AuthService {
     };
   }
 
+  async validateEmail(
+    code: string,
+    email: string,
+    lng: Languages,
+  ): Promise<InvalidDataException | { message: string }> {
+    const link = await this.prisma.registerLink.findFirst({
+      where: {
+        link_code: code,
+      },
+      include: {
+        organisation: true,
+      },
+    });
+
+    if (!link) throw new InvalidDataException(AuthErrorsEnum.InvalidRegisterLink);
+    if (!link.organisation.active) throw new InvalidDataException(AuthErrorsEnum.OrganisationIsInactive);
+
+    const isExist = await this.prisma.user.findFirst({
+      where: {
+        email: email,
+      },
+    });
+
+    if (isExist) throw new InvalidDataException(AuthErrorsEnum.UserAlreadyExist);
+
+    const otp = generate(6, { lowerCaseAlphabets: false, specialChars: false });
+    const text = generateEmailText(lng, otp);
+
+    await this.prisma.emailOTP.deleteMany({
+      where: {
+        email: email,
+      },
+    });
+
+    await this.prisma.emailOTP.create({
+      data: {
+        email,
+        otp,
+      },
+    });
+
+    const { error } = await this.resend.emails.send({
+      from: 'VAYTONE LMS <onboarding@vaytone.xyz>',
+      to: [email],
+      subject: 'Welcome to Vaytone LMS',
+      html: text,
+    });
+
+    if (error) {
+      console.log(error);
+      throw new InvalidDataException(AuthErrorsEnum.EmailServiceError);
+    }
+
+    return {
+      message: 'Success',
+    };
+  }
+
+  async validateOtp(code: string, dto: ValidateOtpDto) {
+    const link = await this.prisma.registerLink.findFirst({
+      where: {
+        link_code: code,
+      },
+      include: {
+        organisation: true,
+      },
+    });
+
+    if (!link) throw new InvalidDataException(AuthErrorsEnum.OrganisationNotFound);
+    if (!link.organisation.active) throw new InvalidDataException(AuthErrorsEnum.OrganisationIsInactive);
+
+    const checkOtp = await this.prisma.emailOTP.findFirst({
+      where: {
+        otp: dto.otp,
+        email: dto.email,
+      },
+    });
+
+    if (!checkOtp) throw new InvalidDataException(AuthErrorsEnum.OTPInvalid);
+
+    const otpCreatedAt = new Date(checkOtp.created_at);
+
+    const currentTime = new Date();
+
+    const diffInMinutes = (currentTime.getTime() - otpCreatedAt.getTime()) / (1000 * 60);
+
+    if (diffInMinutes > 10) {
+      throw new InvalidDataException(AuthErrorsEnum.OTPExpired);
+    }
+
+    return {
+      message: 'Success',
+    };
+  }
+
   async register(res: Response, dto: RegisterByLinkDto): Promise<UserDto | InvalidDataException> {
     const link = await this.prisma.registerLink.findFirst({
       where: {
@@ -60,7 +161,7 @@ export class AuthService {
     if (!link) throw new InvalidDataException(AuthErrorsEnum.OrganisationNotFound);
     if (!link.organisation.active) throw new InvalidDataException(AuthErrorsEnum.OrganisationIsInactive);
 
-    const isExist = await this.userService.getUserByLogin(dto.login);
+    const isExist = await this.userService.getUserByEmail(dto.email);
     if (isExist) throw new InvalidDataException(AuthErrorsEnum.UserAlreadyExist);
 
     try {
@@ -73,27 +174,16 @@ export class AuthService {
 
       const hashPassword = await bcrypt.hash(dto.password, 10);
 
-      console.log(dto);
-      console.log(link.organisation_id);
-
       const user = await this.userService.createUser({
         lastName: dto.lastName,
         firstName: dto.firstName,
-        login: dto.login,
+        email: dto.email,
         organisation_id: link.organisation_id,
         password: hashPassword,
+        greetingMessage: dto.greetingMessage,
         role: link.role,
         avatar: avatarName,
       });
-
-      if (dto.greetingMessage) {
-        await this.prisma.userGreetingMessage.create({
-          data: {
-            user_id: user.id,
-            text: dto.greetingMessage,
-          },
-        });
-      }
 
       const tokens = this.tokenService.generateTokens(user);
       await this.tokenService.setToken(user.id, tokens.refresh);
@@ -145,7 +235,7 @@ export class AuthService {
         return Promise.reject();
       }
 
-      const userBody: UserWithOrg = await this.userService.getUserByLogin(user.login);
+      const userBody: UserDetails = await this.userService.getUserByEmail(user.email);
       const simpleUserBody = new SimpleUserDto(userBody);
 
       return { ...simpleUserBody, token: newTokens.access };

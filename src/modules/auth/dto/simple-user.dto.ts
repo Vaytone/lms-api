@@ -1,28 +1,34 @@
 import { Role, UserStatus } from '@prisma/client';
-import { UserWithOrg } from '../../user/types/user.types';
+import { UserDetails } from '../../user/types/user.types';
 
 export class SimpleUserDto {
-  constructor(user: UserWithOrg) {
+  constructor(user: UserDetails) {
     this.firstName = user.first_name;
     this.lastName = user.last_name;
-    this.login = user.login;
     this.id = user.id;
-    this.status = user.status;
-    this.closed = user.closed;
-    this.role = user.role;
+    this.email = user.email;
     this.organisation = {
       name: user.organisation.name,
       short_name: user.organisation.short_name,
     };
+    this.role = user.user_info.role;
+    this.role_description = user.user_info.role_description;
+    this.status = user.user_statuses.status;
+    this.closed = user.user_statuses.closed;
     this.avatar = user.avatar;
   }
+
   id: string | number;
-  login: string;
+  email: string;
   firstName: string;
   lastName: string;
-  status: UserStatus;
-  closed: boolean;
   avatar: string | null;
   role: Role;
-  organisation: UserWithOrg['organisation'];
+  status: UserStatus;
+  role_description?: string | null;
+  closed: boolean | null;
+  organisation: {
+    name: string;
+    short_name: string;
+  };
 }

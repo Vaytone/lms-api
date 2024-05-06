@@ -8,26 +8,58 @@ datasource db {
 }
 
 model User {
-  id               Int        @id @default(autoincrement())
-  login            String     @unique
-  password         String
-  first_name       String
-  last_name        String
-  avatar           String?
-  created_at       DateTime   @default(now())
-  updated_at       DateTime?  @updatedAt
-  role             Role       @default(guest)
-  role_description String?
-  organisation_id  Int
-  status           UserStatus @default(pending)
-  closed           Boolean    @default(false)
+  id              Int       @id @default(autoincrement())
+  email           String
+  password        String
+  first_name      String
+  last_name       String
+  full_name       String
+  avatar          String?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime? @updatedAt
+  organisation_id Int
 
   // relation
-  token        Token?
-  message      UserGreetingMessage?
-  organisation Organisation         @relation(fields: [organisation_id], references: [id])
+  token         Token?
+  message       UserGreetingMessage?
+  organisation  Organisation         @relation(fields: [organisation_id], references: [id])
+  user_info     UserOrganisation?
+  user_statuses UserStatuses?
 
   @@map(name: "users")
+}
+
+model EmailOTP {
+  id           Int      @id @default(autoincrement())
+  email        String
+  created_at   DateTime @default(now())
+  is_validated Boolean  @default(false)
+  otp          String
+
+  @@map(name: "email_otps")
+}
+
+model UserOrganisation {
+  id               Int     @id @default(autoincrement())
+  organisation_id  Int
+  user_id          Int     @unique
+  role             Role    @default(guest)
+  role_description String?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map(name: "user_organisations")
+}
+
+model UserStatuses {
+  id      Int        @id @default(autoincrement())
+  user_id Int        @unique
+  status  UserStatus @default(pending)
+  closed  Boolean    @default(false)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map(name: "user_statuses")
 }
 
 model UserGreetingMessage {

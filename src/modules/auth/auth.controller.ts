@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, Res } from '@nestjs/common';
 import { AUTH_ROUTES } from '../../constants/routes/auth.routes';
 import { AuthService } from './auth.service';
 import { InvalidDataException } from '../../exceptions/invalidData.exception';
@@ -12,6 +12,8 @@ import { SignInDto } from './dto/sign-in.dto';
 import { Public } from 'src/shared/decorator/public.decorator';
 import { FreeAccess } from '../../shared/decorator/freeAccess.decorator';
 import { FormDataRequest } from 'nestjs-form-data';
+import { Languages } from '../../types/core.types';
+import { ValidateOtpDto } from './dto/validate-otp.dto';
 
 @FreeAccess()
 @Controller(AUTH_ROUTES.DEFAULT)
@@ -35,6 +37,37 @@ export class AuthController {
     }
 
     return this.authService.validateRegisterLink(code);
+  }
+
+  @ApiOkResponse({ description: 'Validate register link and email. Create otp for email' })
+  @ApiBadRequestResponse({ description: 'Invalid register link or email. Return error' })
+  @Public()
+  @Get(AUTH_ROUTES.VALIDATE_EMAIL)
+  createOtp(
+    @Param('code') code: string,
+    @Query('email') email: string,
+    @Query('lng') lng: Languages,
+  ): Promise<{ message: string } | InvalidDataException> | InvalidDataException {
+    if (!code) {
+      return new InvalidDataException(AuthErrorsEnum.InvalidRegisterLink);
+    }
+
+    return this.authService.validateEmail(code, email, lng);
+  }
+
+  @ApiOkResponse({ description: 'Validate register link and email. Create otp for email' })
+  @ApiBadRequestResponse({ description: 'Invalid register link or email. Return error' })
+  @Public()
+  @Post(AUTH_ROUTES.VALIDATE_OTP)
+  validateOtp(
+    @Param('code') code: string,
+    @Body() dto: ValidateOtpDto,
+  ): Promise<{ message: string } | InvalidDataException> | InvalidDataException {
+    if (!code) {
+      return new InvalidDataException(AuthErrorsEnum.InvalidRegisterLink);
+    }
+
+    return this.authService.validateOtp(code, dto);
   }
 
   @ApiOkResponse({

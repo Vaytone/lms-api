@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../db/prisma.service';
-import { CreateUser, UserWithOrg } from './types/user.types';
+import { CreateUser, UserDetails } from './types/user.types';
 import { SignInDto } from '../auth/dto/sign-in.dto';
 import * as bcrypt from 'bcryptjs';
 import { InvalidDataException } from '../../exceptions/invalidData.exception';
@@ -13,24 +13,51 @@ export class UserService {
   async createUser(dto: CreateUser) {
     const user = await this.prisma.user.create({
       data: {
-        login: dto.login,
-        status: 'pending',
-        closed: false,
+        email: dto.email,
         first_name: dto.firstName,
         last_name: dto.lastName,
         password: dto.password,
-        role: dto.role,
-        organisation_id: dto.organisation_id,
+        full_name: `${dto.firstName} ${dto.lastName}`,
+        organisation: {
+          connect: {
+            id: dto.organisation_id,
+          },
+        },
         avatar: dto.avatar,
       },
     });
 
-    return this.getUserByLogin(user.login);
+    if (dto.greetingMessage) {
+      await this.prisma.userGreetingMessage.create({
+        data: {
+          user_id: user.id,
+          text: dto.greetingMessage,
+        },
+      });
+    }
+
+    await this.prisma.userStatuses.create({
+      data: {
+        status: 'pending',
+        closed: false,
+        user_id: user.id,
+      },
+    });
+
+    await this.prisma.userOrganisation.create({
+      data: {
+        user_id: user.id,
+        organisation_id: dto.organisation_id,
+        role: dto.role,
+      },
+    });
+
+    return this.getUserByEmail(user.email);
   }
 
   async validateUser(dto: SignInDto) {
     console.log(dto);
-    const user: UserWithOrg = await this.getUserByLogin(dto.login);
+    const user: UserDetails = await this.getUserByEmail(dto.email);
     console.log(user);
     try {
       const isPasswordCorrect = await bcrypt.compare(dto.password, user.password);
@@ -43,13 +70,16 @@ export class UserService {
     throw new InvalidDataException(AuthErrorsEnum.WrongLoginPassword);
   }
 
-  async getUserByLogin(login: string) {
+  async getUserByEmail(email: string) {
     return this.prisma.user.findFirst({
       where: {
-        login,
+        email,
       },
       include: {
         organisation: true,
+        user_info: true,
+        user_statuses: true,
+        message: true,
       },
     });
   }

@@ -1,6 +1,6 @@
-import { IsOptional, IsString, Length, Matches } from 'class-validator';
+import { IsOptional, IsString, Length, Matches, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { LOGIN_REGEX, NAME_REGEX, PASSWORD_REGEX } from '../constants/regex';
+import { NAME_REGEX, PASSWORD_REGEX } from '../constants/regex';
 import { HasMimeType, IsFile, MaxFileSize, MemoryStoredFile } from 'nestjs-form-data';
 
 export class RegisterByLinkDto {
@@ -34,12 +34,10 @@ export class RegisterByLinkDto {
   readonly lastName: string;
   @ApiProperty({
     example: 'vikbon',
-    description: 'User login',
+    description: 'User email',
   })
-  @Length(5, 30)
-  @IsString({ message: 'Must be a string' })
-  @Matches(LOGIN_REGEX)
-  readonly login: string;
+  @IsEmail()
+  readonly email: string;
   @ApiProperty({
     example: 'vikbon291x',
     description: 'User password',
