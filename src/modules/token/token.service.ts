@@ -29,7 +29,7 @@ export class TokenService {
   generateTokens(user: User) {
     const payload = {
       id: user.id,
-      login: user.login,
+      login: user.email,
     };
     return {
       access: this.jwtService.sign(payload, {

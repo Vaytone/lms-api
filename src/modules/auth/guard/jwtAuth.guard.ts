@@ -39,6 +39,9 @@ export class JwtAuthGuard implements CanActivate {
         where: {
           id: user.id,
         },
+        include: {
+          user_info: true,
+        },
       });
 
       if (!userInDb) {
@@ -47,7 +50,7 @@ export class JwtAuthGuard implements CanActivate {
 
       req.user = {
         ...user,
-        role: userInDb.role,
+        role: userInDb.user_info.role,
       };
 
       return true;

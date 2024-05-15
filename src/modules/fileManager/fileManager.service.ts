@@ -1,17 +1,19 @@
 import { Injectable } from '@nestjs/common';
-// @ts-ignore
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import * as process from 'process';
 import { MemoryStoredFile } from 'nestjs-form-data';
 import { AWSDirname } from '../../types/core.types';
 import { Readable } from 'stream';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 @Injectable()
 export class FileManagerService {
   private AWS_S3_BUCKET = 'school-woop-app';
   private s3 = new S3Client({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_KEY_ID,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
     region: 'eu-central-1',
   });
 

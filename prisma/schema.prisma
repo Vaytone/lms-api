@@ -8,23 +8,69 @@ datasource db {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  login            String    @unique
-  password         String
-  first_name       String
-  last_name        String
-  avatar           String?
-  created_at       DateTime  @default(now())
-  updated_at       DateTime? @updatedAt
-  role             Role      @default(guest)
-  role_description String?
-  organisation_id  Int
-  active           Boolean   @default(false)
-  closed           Boolean   @default(false)
+  id              Int       @id @default(autoincrement())
+  email           String
+  password        String
+  first_name      String
+  last_name       String
+  full_name       String
+  avatar          String?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime? @updatedAt
+  organisation_id Int
 
   // relation
-  token        Token?
-  organisation Organisation @relation(fields: [organisation_id], references: [id])
+  token         Token?
+  message       UserGreetingMessage?
+  organisation  Organisation         @relation(fields: [organisation_id], references: [id])
+  user_info     UserOrganisation?
+  user_statuses UserStatuses?
+
+  @@map(name: "users")
+}
+
+model EmailOTP {
+  id           Int      @id @default(autoincrement())
+  email        String
+  created_at   DateTime @default(now())
+  is_validated Boolean  @default(false)
+  otp          String
+
+  @@map(name: "email_otps")
+}
+
+model UserOrganisation {
+  id               Int     @id @default(autoincrement())
+  organisation_id  Int
+  user_id          Int     @unique
+  role             Role    @default(guest)
+  role_description String?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map(name: "user_organisations")
+}
+
+model UserStatuses {
+  id      Int        @id @default(autoincrement())
+  user_id Int        @unique
+  status  UserStatus @default(pending)
+  closed  Boolean    @default(false)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map(name: "user_statuses")
+}
+
+model UserGreetingMessage {
+  id      Int    @id @default(autoincrement())
+  user_id Int    @unique
+  text    String
+
+  // relation
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map(name: "users_greeting_messages")
 }
 
 enum Role {
@@ -33,6 +79,12 @@ enum Role {
   admin
   student
   watcher
+}
+
+enum UserStatus {
+  pending
+  active
+  rejected
 }
 
 enum RegisterRole {
@@ -59,6 +111,8 @@ model Organisation {
 
   // relation
   plan SubscriptionPlan @relation(fields: [plan_id], references: [id])
+
+  @@map(name: "organisations")
 }
 
 model SubscriptionPlan {
@@ -70,6 +124,8 @@ model SubscriptionPlan {
   name        String
 
   organisations Organisation[]
+
+  @@map(name: "subscription_plans")
 }
 
 model RegisterLink {
@@ -80,6 +136,8 @@ model RegisterLink {
 
   // relation
   organisation Organisation @relation(fields: [organisation_id], references: [id])
+
+  @@map(name: "register_links")
 }
 
 model Token {
@@ -89,4 +147,6 @@ model Token {
 
   // relation
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map(name: "tokens")
 }

@@ -6,5 +6,8 @@ export enum AuthErrorsEnum {
   UserAlreadyExist = 'USER_ALREADY_EXIST',
   NotAuthorized = 'NOT_AUTHORIZED',
   WrongLoginPassword = 'WRONG_LOGIN_PASSWORD',
+  EmailServiceError = 'EMAIL_SERVICE_ERROR',
+  OTPInvalid = 'OTP_INVALID',
+  OTPExpired = 'OTP_EXPIRED',
   NoAccess = 'NO_ACCESS',
 }

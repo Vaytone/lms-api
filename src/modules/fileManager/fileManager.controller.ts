@@ -22,6 +22,7 @@ export class FileManagerController {
 
       res.end(result);
     } catch (err) {
+      console.log(err);
       throw new InvalidDataException(DefaultErrorsEnum.SomethingWentWrong);
     }
   }

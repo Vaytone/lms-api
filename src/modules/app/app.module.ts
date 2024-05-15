@@ -11,15 +11,18 @@ import { JwtAuthGuard } from '../auth/guard/jwtAuth.guard';
 import { OrganisationActiveStatusGuard } from '../organisation/guard/organisationActiveStatus.guard';
 import { PrismaService } from '../../db/prisma.service';
 import { join } from 'path';
-import { FileManagerModule } from '../fileManager/fileManager.module';
+import { ApplicationsModule } from '../applications/applications.module';
 
 @Module({
   imports: [
-    FileManagerModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../../..', '/public/img'),
       exclude: ['/api/(.*)'],
       serveRoot: '/img',
+      serveStaticOptions: {
+        cacheControl: true,
+        maxAge: 3000 * 60 * 1000,
+      },
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../../../..', 'client/dist'),
@@ -29,6 +32,7 @@ import { FileManagerModule } from '../fileManager/fileManager.module';
     CoreModule,
     AuthModule,
     OrganisationModule,
+    ApplicationsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,6 +1,6 @@
-import { Role } from '@prisma/client';
+import { Role, UserStatus } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserWithOrg } from '../../user/types/user.types';
+import { UserDetails } from '../../user/types/user.types';
 
 export class UserDto {
   @ApiProperty({
@@ -9,10 +9,10 @@ export class UserDto {
   })
   id: string | number;
   @ApiProperty({
-    description: 'User login',
-    example: 'login',
+    description: 'User email',
+    example: 'login@login.com',
   })
-  login: string;
+  email: string;
   @ApiProperty({
     description: 'User first name',
     example: 'Viktor',
@@ -26,9 +26,9 @@ export class UserDto {
 
   @ApiProperty({
     description: 'User active status in organisation',
-    example: false,
+    example: UserStatus.active,
   })
-  active: boolean;
+  status: UserStatus;
 
   @ApiProperty({
     description: 'User closed status in organisation',
@@ -55,5 +55,5 @@ export class UserDto {
       short_name: 'sfc #1',
     },
   })
-  organisation: UserWithOrg['organisation'];
+  organisation: UserDetails['organisation'];
 }
