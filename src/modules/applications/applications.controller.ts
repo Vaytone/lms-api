@@ -59,6 +59,22 @@ export class ApplicationsController {
     return this.applicationService.reject(req, id);
   }
 
+  @ApiOkResponse({
+    description: 'Revert application status to pending and return user_statuses object',
+  })
+  @ApiBadRequestResponse({
+    description: 'Returns error',
+  })
+  @Put(ApplicationRoutes.Revert)
+  @Roles(Role.owner)
+  revert(@Req() req: Request, @Query('id') id: number) {
+    if (!id) {
+      throw new InvalidDataException(DefaultErrorsEnum.SomethingWentWrong);
+    }
+
+    return this.applicationService.revert(req, id);
+  }
+
   @Delete()
   delete() {}
 }

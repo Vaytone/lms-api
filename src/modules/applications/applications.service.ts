@@ -1,9 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../db/prisma.service';
 import { Request } from 'express';
-import { UserStatus } from '@prisma/client';
+import { Role, UserStatus } from '@prisma/client';
 import { ApplicationsErrorEnum } from '../../constants/errors/applications.error';
 import { GetApplicationsQueriesDto } from './dto/get-applications-queries.dto';
+import { ForbiddenExceptionException } from '../../exceptions/Forbidden.exception';
+import { DefaultErrorsEnum } from '../../constants/errors/default.errors';
 
 @Injectable()
 export class ApplicationsService {
@@ -91,6 +93,49 @@ export class ApplicationsService {
       throw new UnauthorizedException(ApplicationsErrorEnum.ApplicationNotFound);
     }
 
+    const maxRolesMatrix = {
+      [Role.admin]: 'max_admin',
+      [Role.student]: 'max_student',
+      [Role.watcher]: 'max_watcher',
+    };
+
+    const roleExcedeedErrorMatrix = {
+      [Role.admin]: ApplicationsErrorEnum.AdminLimitExceeded,
+      [Role.student]: ApplicationsErrorEnum.StudentLimitExceeded,
+      [Role.watcher]: ApplicationsErrorEnum.WatcherLimitExceeded,
+    };
+
+    const currentUserCounter = await this.prisma.user.count({
+      where: {
+        user_statuses: {
+          status: UserStatus.active,
+          closed: false,
+        },
+        user_info: {
+          role: orgUserCheck.role,
+        },
+      },
+    });
+
+    const { plan } = await this.prisma.organisation.findFirst({
+      where: {
+        id: req.user.organisation_id,
+      },
+      include: {
+        plan: true,
+      },
+    });
+
+    if (!plan) {
+      throw new ForbiddenException(DefaultErrorsEnum.OrganisationNoPlan);
+    }
+
+    console.log(plan[maxRolesMatrix[orgUserCheck.role]]);
+
+    if (plan[maxRolesMatrix[orgUserCheck.role]] < currentUserCounter + 1) {
+      throw new ForbiddenException(roleExcedeedErrorMatrix[orgUserCheck.role]);
+    }
+
     const result = await this.prisma.userStatuses.update({
       where: {
         user_id: id,
@@ -121,6 +166,30 @@ export class ApplicationsService {
       },
       data: {
         status: 'rejected',
+      },
+    });
+
+    return result;
+  }
+
+  async revert(req: Request, id: number) {
+    const orgUserCheck = await this.prisma.userOrganisation.findFirst({
+      where: {
+        organisation_id: req.user.organisation_id,
+        user_id: id,
+      },
+    });
+
+    if (!orgUserCheck) {
+      throw new UnauthorizedException(ApplicationsErrorEnum.ApplicationNotFound);
+    }
+
+    const result = await this.prisma.userStatuses.update({
+      where: {
+        user_id: id,
+      },
+      data: {
+        status: 'pending',
       },
     });
 
