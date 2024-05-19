@@ -8,4 +8,5 @@ export class GetApplicationsQueriesDto {
   sortBy: string;
   @IsIn(['watcher', 'student', 'admin', 'all'])
   role: string;
+  page: number;
 }

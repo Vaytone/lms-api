@@ -1,17 +1,16 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../db/prisma.service';
 import { Request } from 'express';
 import { Role, UserStatus } from '@prisma/client';
 import { ApplicationsErrorEnum } from '../../constants/errors/applications.error';
 import { GetApplicationsQueriesDto } from './dto/get-applications-queries.dto';
-import { ForbiddenExceptionException } from '../../exceptions/Forbidden.exception';
 import { DefaultErrorsEnum } from '../../constants/errors/default.errors';
 
 @Injectable()
 export class ApplicationsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  get(req: Request, { role, sortBy, query }: GetApplicationsQueriesDto) {
+  async get(req: Request, { role = 'all', sortBy = 'created_at', query = '', page = 1 }: GetApplicationsQueriesDto) {
     const filters = {
       user_info: {},
       user_statuses: {
@@ -32,7 +31,37 @@ export class ApplicationsService {
       };
     }
 
-    const result = this.prisma.user.findMany({
+    const limit = 17;
+    let currentPage = Number(page) < 1 ? 1 : Number(page);
+    const userCount = await this.prisma.user.count({
+      where: {
+        ...filters,
+        OR: [
+          {
+            full_name: {
+              contains: query.trim(),
+              mode: 'insensitive',
+            },
+          },
+          {
+            email: {
+              contains: query.trim(),
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
+
+    const pageCount = Math.ceil(userCount / limit) <= 1 ? 1 : Math.ceil(userCount / limit);
+
+    if (pageCount < currentPage) {
+      currentPage = pageCount;
+    }
+
+    const skip = (currentPage - 1) * limit;
+
+    const result = await this.prisma.user.findMany({
       where: {
         ...filters,
         OR: [
@@ -76,9 +105,16 @@ export class ApplicationsService {
         },
       },
       orderBy: orderBy,
+      skip,
+      take: limit,
     });
 
-    return result;
+    return {
+      data: result,
+      page: currentPage,
+      pageCount,
+      hasNextPage: userCount > currentPage * limit,
+    };
   }
 
   async accept(req: Request, id: number) {
@@ -90,7 +126,7 @@ export class ApplicationsService {
     });
 
     if (!orgUserCheck) {
-      throw new UnauthorizedException(ApplicationsErrorEnum.ApplicationNotFound);
+      throw new BadRequestException(ApplicationsErrorEnum.ApplicationNotFound);
     }
 
     const maxRolesMatrix = {
@@ -130,18 +166,28 @@ export class ApplicationsService {
       throw new ForbiddenException(DefaultErrorsEnum.OrganisationNoPlan);
     }
 
-    console.log(plan[maxRolesMatrix[orgUserCheck.role]]);
-
     if (plan[maxRolesMatrix[orgUserCheck.role]] < currentUserCounter + 1) {
       throw new ForbiddenException(roleExcedeedErrorMatrix[orgUserCheck.role]);
+    }
+
+    const userToUpdate = await this.prisma.userStatuses.findFirst({
+      where: {
+        user_id: id,
+        status: 'pending',
+      },
+    });
+
+    if (!userToUpdate) {
+      throw new BadRequestException(ApplicationsErrorEnum.ApplicationNotFound);
     }
 
     const result = await this.prisma.userStatuses.update({
       where: {
         user_id: id,
+        status: UserStatus.pending,
       },
       data: {
-        status: 'active',
+        status: UserStatus.active,
       },
     });
 
@@ -160,12 +206,24 @@ export class ApplicationsService {
       throw new UnauthorizedException(ApplicationsErrorEnum.ApplicationNotFound);
     }
 
+    const userToUpdate = await this.prisma.userStatuses.findFirst({
+      where: {
+        user_id: id,
+        status: 'pending',
+      },
+    });
+
+    if (!userToUpdate) {
+      throw new BadRequestException(ApplicationsErrorEnum.ApplicationNotFound);
+    }
+
     const result = await this.prisma.userStatuses.update({
       where: {
         user_id: id,
+        status: UserStatus.pending,
       },
       data: {
-        status: 'rejected',
+        status: UserStatus.rejected,
       },
     });
 
