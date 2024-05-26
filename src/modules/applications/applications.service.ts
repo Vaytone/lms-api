@@ -31,7 +31,7 @@ export class ApplicationsService {
       };
     }
 
-    const limit = 17;
+    const limit = 30;
     let currentPage = Number(page) < 1 ? 1 : Number(page);
     const userCount = await this.prisma.user.count({
       where: {
