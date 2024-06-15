@@ -16,7 +16,7 @@ import { ApplicationsModule } from '../applications/applications.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../../..', '/public/img'),
+      rootPath: join(__dirname, '../../../..', '/public/img'),
       exclude: ['/api/(.*)'],
       serveRoot: '/img',
       serveStaticOptions: {
