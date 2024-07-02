@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, UnauthorizedExcept
 import { PrismaService } from '../../db/prisma.service';
 import { Request } from 'express';
 import { Role, UserStatus } from '@prisma/client';
-import { ApplicationsErrorEnum } from '../../constants/errors/applications.error';
+import { ApplicationsErrorEnum } from '../../constants/errors/applications.errors';
 import { GetApplicationsQueriesDto } from './dto/get-applications-queries.dto';
 import { DefaultErrorsEnum } from '../../constants/errors/default.errors';
 

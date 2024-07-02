@@ -12,6 +12,7 @@ import { OrganisationActiveStatusGuard } from '../organisation/guard/organisatio
 import { PrismaService } from '../../db/prisma.service';
 import { join } from 'path';
 import { ApplicationsModule } from '../applications/applications.module';
+import { GroupsModule } from '../groups/groups.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ApplicationsModule } from '../applications/applications.module';
     AuthModule,
     OrganisationModule,
     ApplicationsModule,
+    GroupsModule,
   ],
   controllers: [AppController],
   providers: [

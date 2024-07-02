@@ -137,7 +137,6 @@ model Group {
   organisation_id Int
   created_at      DateTime     @default(now())
   updated_at      DateTime?    @updatedAt
-  type            GroupType    @default(student)
   users           UserGroups[]
 
   // relation
@@ -171,13 +170,6 @@ enum GroupRole {
   admin
   member
   moderator
-}
-
-enum GroupType {
-  student
-  mixed
-  watcher
-  admin
 }
 
 enum UserStatus {
