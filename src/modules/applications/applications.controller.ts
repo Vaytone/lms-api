@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, NotFoundException, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApplicationRoutes } from '../../constants/routes/applications.routes';
 import { ApplicationsService } from './applications.service';
 import { GetApplicationsQueriesDto } from './dto/get-applications-queries.dto';

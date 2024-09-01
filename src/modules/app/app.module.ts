@@ -12,11 +12,12 @@ import { OrganisationActiveStatusGuard } from '../organisation/guard/organisatio
 import { PrismaService } from '../../db/prisma.service';
 import { join } from 'path';
 import { ApplicationsModule } from '../applications/applications.module';
+import { GroupsModule } from '../groups/groups.module';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../../..', '/public/img'),
+      rootPath: join(__dirname, '../../../..', '/public/img'),
       exclude: ['/api/(.*)'],
       serveRoot: '/img',
       serveStaticOptions: {
@@ -33,6 +34,7 @@ import { ApplicationsModule } from '../applications/applications.module';
     AuthModule,
     OrganisationModule,
     ApplicationsModule,
+    GroupsModule,
   ],
   controllers: [AppController],
   providers: [

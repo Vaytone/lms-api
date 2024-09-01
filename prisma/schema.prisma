@@ -25,6 +25,7 @@ model User {
   organisation  Organisation         @relation(fields: [organisation_id], references: [id])
   user_info     UserOrganisation?
   user_statuses UserStatuses?
+  groups        UserGroups[]
 
   @@map(name: "users")
 }
@@ -71,27 +72,6 @@ model UserGreetingMessage {
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map(name: "users_greeting_messages")
-}
-
-enum Role {
-  guest
-  owner
-  admin
-  student
-  watcher
-}
-
-enum UserStatus {
-  pending
-  active
-  rejected
-}
-
-enum RegisterRole {
-  guest
-  admin
-  student
-  watcher
 }
 
 model Organisation {
@@ -149,4 +129,58 @@ model Token {
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map(name: "tokens")
+}
+
+model Group {
+  id              Int          @id @default(autoincrement())
+  name            String
+  organisation_id Int
+  created_at      DateTime     @default(now())
+  updated_at      DateTime?    @updatedAt
+  users           UserGroups[]
+
+  // relation
+  @@map(name: "groups")
+}
+
+model UserGroups {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  group_id   Int
+  role       GroupRole
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  // relation
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [group_id], references: [id], onDelete: Cascade)
+
+  @@map(name: "user_groups")
+}
+
+enum Role {
+  guest
+  owner
+  admin
+  student
+  watcher
+}
+
+enum GroupRole {
+  admin
+  member
+  moderator
+}
+
+enum UserStatus {
+  pending
+  active
+  rejected
+}
+
+enum RegisterRole {
+  guest
+  admin
+  student
+  watcher
 }
