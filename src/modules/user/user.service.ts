@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../db/prisma.service';
 import { CreateUser, UserDetails } from './types/user.types';
 import { SignInDto } from '../auth/dto/sign-in.dto';
 import * as bcrypt from 'bcryptjs';
 import { InvalidDataException } from '../../exceptions/invalidData.exception';
 import { AuthErrorsEnum } from '../../constants/errors/auth.errors';
+import { DefaultErrorsEnum } from '../../constants/errors/default.errors';
 
 @Injectable()
 export class UserService {
@@ -71,9 +72,13 @@ export class UserService {
   }
 
   async getUserByEmail(email: string) {
+    if (!email) {
+      throw new BadRequestException(DefaultErrorsEnum.SomethingWentWrong);
+    }
+
     return this.prisma.user.findFirst({
       where: {
-        email,
+        email: email,
       },
       include: {
         organisation: true,
