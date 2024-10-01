@@ -7,6 +7,7 @@ export class SimpleUserDto {
     this.lastName = user.last_name;
     this.id = user.id;
     this.email = user.email;
+    this.full_name = user.full_name;
     this.organisation = {
       name: user.organisation.name,
       short_name: user.organisation.short_name,
@@ -18,6 +19,7 @@ export class SimpleUserDto {
     this.avatar = user.avatar;
   }
 
+  full_name: string;
   id: string | number;
   email: string;
   firstName: string;

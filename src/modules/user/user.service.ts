@@ -18,7 +18,7 @@ export class UserService {
         first_name: dto.firstName,
         last_name: dto.lastName,
         password: dto.password,
-        full_name: `${dto.firstName} ${dto.lastName}`,
+        full_name: dto.full_name,
         organisation: {
           connect: {
             id: dto.organisation_id,

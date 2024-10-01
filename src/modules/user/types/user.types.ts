@@ -9,6 +9,7 @@ export interface CreateUser {
   greetingMessage?: string;
   organisation_id: number;
   avatar: string | null;
+  full_name: string;
 }
 
 export interface UserDetails extends User {
