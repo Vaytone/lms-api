@@ -5,6 +5,7 @@ import { CORS_URL } from './constants/core';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import * as process from 'process';
+import { urlencoded } from "express";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -26,6 +27,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(cookieParser());
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   await app.listen(process.env.APP_PORT || 5000, () => {
     console.log(`LMS-API started http://localhost:${process.env.APP_PORT || 5000}`);

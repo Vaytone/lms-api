@@ -26,6 +26,7 @@ model User {
   user_info     UserOrganisation?
   user_statuses UserStatuses?
   groups        UserGroups[]
+  courses       Courses[]
 
   @@map(name: "users")
 }
@@ -156,6 +157,22 @@ model UserGroups {
   group Group @relation(fields: [group_id], references: [id], onDelete: Cascade)
 
   @@map(name: "user_groups")
+}
+
+model Courses {
+  id          Int       @id @default(autoincrement())
+  author_id   Int
+  title       String
+  description String
+  items       Json
+  blocks      Json
+  blocksInfo  Json
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+
+  author User @relation(fields: [author_id], references: [id], onDelete: Cascade)
+
+  @@map(name: "courses")
 }
 
 enum Role {

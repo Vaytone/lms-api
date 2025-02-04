@@ -15,7 +15,6 @@ export class FileManagerController {
 
   @Get(FileManagerRoutes.GetImg)
   async getPhoto(@Param('key') key: string, @Param('dir') dir: string, @Res({ passthrough: true }) res: Response) {
-    console.log('puz', key, dir);
     try {
       const result = await this.fileManagerService.getPhoto(`${dir}/${key}`);
       res.setHeader('Cache-Control', 'public, max-age=2592000');

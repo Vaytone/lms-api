@@ -157,31 +157,25 @@ export class AuthService {
         organisation: true,
       },
     });
-    console.log(dto);
+
     if (!link) throw new InvalidDataException(AuthErrorsEnum.OrganisationNotFound);
     if (!link.organisation.active) throw new InvalidDataException(AuthErrorsEnum.OrganisationIsInactive);
-    
+
     const isExist = await this.userService.getUserByEmail(dto.email);
     if (isExist) throw new InvalidDataException(AuthErrorsEnum.UserAlreadyExist);
 
     try {
       let avatarName = null;
-      
-      console.log('bbbb');
-      
       if (dto.avatar) {
         avatarName = await this.fileService.uploadFile(AWSDirname.Avatars, dto.avatar);
-        console.log(avatarName);
       }
 
       const hashPassword = await bcrypt.hash(dto.password, 10);
-      
-      console.log('xxxx');
-      
       const user = await this.userService.createUser({
         lastName: dto.lastName,
         firstName: dto.firstName,
         email: dto.email,
+        full_name: `${dto.firstName} ${dto.lastName}`,
         organisation_id: link.organisation_id,
         password: hashPassword,
         greetingMessage: dto.greetingMessage,
@@ -235,8 +229,6 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET || 'refresh',
       });
 
-      console.log(user);
-
       const newTokens = this.tokenService.generateTokens(user);
 
       if (user.id !== tokenCheck.user_id) {
@@ -244,8 +236,6 @@ export class AuthService {
       }
 
       const userBody: UserDetails = await this.userService.getUserByEmail(user.email);
-
-      // console.log(userBody, 'USER BODY');
 
       const simpleUserBody = new SimpleUserDto(userBody);
 

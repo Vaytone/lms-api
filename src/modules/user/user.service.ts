@@ -18,7 +18,7 @@ export class UserService {
         first_name: dto.firstName,
         last_name: dto.lastName,
         password: dto.password,
-        full_name: `${dto.firstName} ${dto.lastName}`,
+        full_name: dto.full_name,
         organisation: {
           connect: {
             id: dto.organisation_id,
@@ -57,9 +57,7 @@ export class UserService {
   }
 
   async validateUser(dto: SignInDto) {
-    console.log(dto);
     const user: UserDetails = await this.getUserByEmail(dto.email);
-    console.log(user);
     try {
       const isPasswordCorrect = await bcrypt.compare(dto.password, user.password);
       if (user && isPasswordCorrect) {
