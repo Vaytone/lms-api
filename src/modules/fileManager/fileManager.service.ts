@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { MemoryStoredFile } from 'nestjs-form-data';
 import { AWSDirname } from '../../types/core.types';
 import { Readable } from 'stream';
@@ -23,6 +23,54 @@ export class FileManagerService {
     await this.s3_upload(file.buffer, this.AWS_S3_BUCKET, `${dirName}/${originalName}.${file.mimetype.split('/')[1]}`);
 
     return `${dirName}/${originalName}.${file.mimetype.split('/')[1]}`;
+  }
+
+  async uploadMinorFile(dirName: AWSDirname, file: MemoryStoredFile) {
+    const { originalName } = file;
+
+    await this.s3_upload(file.buffer, this.AWS_S3_BUCKET, `${dirName}/${originalName}`);
+
+    return `${dirName}/${originalName}`;
+  }
+
+  async uploadFiles(dirName: AWSDirname, files: MemoryStoredFile[]) {
+    const uploadedFiles = [];
+
+    try {
+      for (const file of files) {
+        const { originalName } = file;
+        const filePath = `${dirName}/${originalName}.${file.mimetype.split('/')[1]}`;
+
+        // Upload file to S3
+        await this.s3_upload(file.buffer, this.AWS_S3_BUCKET, filePath);
+
+        // Store the successfully uploaded file path
+        uploadedFiles.push(filePath);
+      }
+
+      // Return paths of successfully uploaded files
+      return uploadedFiles;
+    } catch (error) {
+      // If any file upload fails, delete all previously uploaded files
+      for (const uploadedFile of uploadedFiles) {
+        await this.s3_delete(uploadedFile, this.AWS_S3_BUCKET);
+      }
+
+      throw new Error('File upload failed. All previously uploaded files have been deleted.');
+    }
+  }
+
+  async s3_delete(filePath: string, bucket: string) {
+    const command = new DeleteObjectCommand({
+      Bucket: bucket,
+      Key: filePath,
+    });
+
+    try {
+      await this.s3.send(command);
+    } catch (error) {
+      console.error('Error deleting file from S3:', error);
+    }
   }
 
   async getPhoto(key: string) {

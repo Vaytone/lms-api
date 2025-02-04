@@ -166,18 +166,16 @@ export class AuthService {
 
     try {
       let avatarName = null;
-
       if (dto.avatar) {
         avatarName = await this.fileService.uploadFile(AWSDirname.Avatars, dto.avatar);
-        console.log(avatarName);
       }
 
       const hashPassword = await bcrypt.hash(dto.password, 10);
-
       const user = await this.userService.createUser({
         lastName: dto.lastName,
         firstName: dto.firstName,
         email: dto.email,
+        full_name: `${dto.firstName} ${dto.lastName}`,
         organisation_id: link.organisation_id,
         password: hashPassword,
         greetingMessage: dto.greetingMessage,
@@ -230,16 +228,21 @@ export class AuthService {
       const user: User | null = this.jwtService.verify(jwtToken, {
         secret: process.env.JWT_REFRESH_SECRET || 'refresh',
       });
+
       const newTokens = this.tokenService.generateTokens(user);
-      if (user.id !== tokenCheck.id) {
-        return Promise.reject();
+
+      if (user.id !== tokenCheck.user_id) {
+        return Promise.reject(AuthErrorsEnum.NotAuthorized);
       }
 
       const userBody: UserDetails = await this.userService.getUserByEmail(user.email);
+
       const simpleUserBody = new SimpleUserDto(userBody);
 
       return { ...simpleUserBody, token: newTokens.access };
     } catch (e) {
+      console.log(e);
+
       throw new UnauthorizedException(AuthErrorsEnum.NotAuthorized);
     }
   }

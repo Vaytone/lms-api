@@ -13,6 +13,7 @@ import { PrismaService } from '../../db/prisma.service';
 import { join } from 'path';
 import { ApplicationsModule } from '../applications/applications.module';
 import { GroupsModule } from '../groups/groups.module';
+import { CourseBuilderModule } from '../courseBuilder/courseBuilder.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { GroupsModule } from '../groups/groups.module';
     AuthModule,
     OrganisationModule,
     ApplicationsModule,
+    CourseBuilderModule,
     GroupsModule,
   ],
   controllers: [AppController],
